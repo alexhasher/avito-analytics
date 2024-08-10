@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Microblog</title>
+      {% else %}
+      <title>Welcome to Microblog</title>
+      {% endif %}
+    </head>
+    <body>
+    <center><h1>Статистика запросов {{ wurl }}</h1></center>
+        <hr>
+    <center><h2>Распределение внимания пользователей по категориям</h2></center>
+          <p>{{ name }}</p>
+    <center><img src={{ url}} alt="Chart" height="420" width="600"></center>
+        <hr>
+    <center><h2>Конкуренция в категориях</h2></center>
+    <hr>
+        {% for table in tables1 %}
+            {{titles1[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
+
+    <center><h2>ТОП10 Предложений по количеству просмотров</h2></center>
+    <hr>
+    {% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
+    <center><input type="button" value="Все объявления во всех категориях"></center>
+
+        {% block content %}{% endblock %}
+    </body>
+</html>

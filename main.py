@@ -1,3 +1,5 @@
+import pymysql
+from config import host, user, password, db_name
 from bs4 import BeautifulSoup
 import requests
 import time
@@ -43,13 +45,39 @@ def page_parse(url2):
     time.sleep(120) #задержка времени перед очередным парсингом страницы, для исключения блокировок сервера 429 - получено эксперементально
     response = requests.get(url2, headers=headers, verify=False)
     if response.status_code == 200:
+        # data = []
         soup = BeautifulSoup(response.text, 'html.parser')
-        title = soup.find("h1").get_text()
-        category = soup.find_all('a', {'class': 'breadcrumbs-link-Vr4Nc'})[3].get_text()
-        views_all = soup.find('span', {'data-marker': 'item-view/total-views'}).get_text()
-        views_today = soup.find('span', {'data-marker': 'item-view/today-views'}).get_text()
-        publish_date = soup.find('span', {'data-marker': 'item-view/item-date'}).get_text()
-        return title, views_all, views_today, category, publish_date
+        url = url2
+        title = soup.find("h1").get_text() #title
+        category = soup.find_all('a', {'class': 'breadcrumbs-link-Vr4Nc'})[3].get_text() #category
+        views_all = soup.find('span', {'data-marker': 'item-view/total-views'}).get_text().split()[0] #views_all
+        views_today = soup.find('span', {'data-marker': 'item-view/today-views'}).get_text().split()[0].replace('(+', '') #views_today
+        publish_date = soup.find('span', {'data-marker': 'item-view/item-date'}).get_text() #publish_date
+        # print(url, title, category, views_all, views_today, publish_date)
+        # #return data
+        # #Занесение данных в базу SQL
+        try:
+            connection = pymysql.connect(
+                host=host,
+                port=3306,
+                user=user,
+                password=password,
+                database=db_name,
+                cursorclass=pymysql.cursors.DictCursor
+            )
+            print("Успешное соединение с", db_name)
+
+
+            try:
+              with connection.cursor() as cursor:
+                insert_query = "INSERT INTO `user_data` (url, title, category, views_all, views_today, publish_date) VALUES (%s, %s, %s, %s, %s, %s);"
+                cursor.execute(insert_query, (url, title, category, views_all, views_today, publish_date))
+                connection.commit()
+            finally:
+              connection.close()
+        except Exception as ex:
+            print(ex)
+            print("Не удалось установить соединение с", db_name)
     else:
         print('Не удалось получить контент страницы для определения значений элементов', response.status_code)
 
@@ -89,8 +117,14 @@ def main():
 
     # print(len(urls_list))
 
+    with open('url-list.txt', 'w+') as f:
+        for items in urls_list:
+            f.write('%s\n' % items)
+        print("File written successfully")
+    f.close()
+
     for u in urls_list:
-        print(page_parse(u))
+        page_parse(u)
 
 if __name__ == "__main__":
     main()
