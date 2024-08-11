@@ -3,6 +3,8 @@ from config import host, user, password, db_name
 from bs4 import BeautifulSoup
 import requests
 import time
+from datetime import datetime, timedelta
+
 
 #задаем заголовки к request запросам, чтобы обойти блокировки avito на робота
 headers = {
@@ -40,6 +42,37 @@ headers = {
 link_url = 'https://www.avito.ru/ufa/gotoviy_biznes'
 urls_list = []
 
+def pars_datetime(string):
+    with open("page_offer_content.html", "r") as file:
+        # soup = BeautifulSoup(file, 'html.parser')
+        # publish_date = soup.find('span', {'data-marker': 'item-view/item-date'}).get_text().strip()[2:]
+        date_list = string.split()
+        if date_list[0] == 'сегодня':
+            pdate = datetime.now().date()
+        elif date_list[0] == 'вчера':
+            pdate = (datetime.now().date()-timedelta(days=1))
+        else:
+            month = date_list[1]
+            match month:
+                case "июля"     : month_int = 7
+                case "августа"  : month_int = 8
+                case "сентября" : month_int = 9
+                case "октября"  : month_int = 10
+                case "ноября"   : month_int = 11
+                case "декабря"  : month_int = 12
+                case "января"   : month_int = 1
+                case "февраля"  : month_int = 2
+                case "марта"    : month_int = 3
+                case "апреля"   : month_int = 4
+                case "май"      : month_int = 5
+                case "июнь"     : month_int = 6
+            if (datetime.now().month - month_int) < 0:
+                year_int = datetime.now().year - 1
+            else:
+                year_int = datetime.now().year
+            pdate = datetime(year_int, month_int, int(date_list[0]))
+        return pdate
+
 #процедура парсинга страницы, которая на выходе получет заголовок, количество просмотров сегодня, общее количество просмотров и дата публикации
 def page_parse(url2):
     time.sleep(120) #задержка времени перед очередным парсингом страницы, для исключения блокировок сервера 429 - получено эксперементально
@@ -47,14 +80,13 @@ def page_parse(url2):
     if response.status_code == 200:
         # data = []
         soup = BeautifulSoup(response.text, 'html.parser')
-        url = url2
+        url = url2.strip()
         title = soup.find("h1").get_text() #title
         category = soup.find_all('a', {'class': 'breadcrumbs-link-Vr4Nc'})[3].get_text() #category
         views_all = soup.find('span', {'data-marker': 'item-view/total-views'}).get_text().split()[0] #views_all
         views_today = soup.find('span', {'data-marker': 'item-view/today-views'}).get_text().split()[0].replace('(+', '') #views_today
-        publish_date = soup.find('span', {'data-marker': 'item-view/item-date'}).get_text() #publish_date
-        # print(url, title, category, views_all, views_today, publish_date)
-        # #return data
+        publish_date = pars_datetime(soup.find('span', {'data-marker': 'item-view/item-date'}).get_text().strip()[2:]) #publish_date
+
         # #Занесение данных в базу SQL
         try:
             connection = pymysql.connect(
@@ -66,8 +98,6 @@ def page_parse(url2):
                 cursorclass=pymysql.cursors.DictCursor
             )
             print("Успешное соединение с", db_name)
-
-
             try:
               with connection.cursor() as cursor:
                 insert_query = "INSERT INTO `user_data` (url, title, category, views_all, views_today, publish_date) VALUES (%s, %s, %s, %s, %s, %s);"
@@ -115,9 +145,9 @@ def main():
         pages_list_parse(u, urls_list)
         time.sleep(60)
 
-    # print(len(urls_list))
+    print(len(urls_list))
 
-    with open('url-list.txt', 'w+') as f:
+    with open(f'url-list.txt-{datetime.now()}', 'w+') as f:
         for items in urls_list:
             f.write('%s\n' % items)
         print("File written successfully")
