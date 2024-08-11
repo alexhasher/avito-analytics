@@ -12,12 +12,17 @@
         <hr>
     <center><h2>Распределение внимания пользователей по категориям</h2></center>
           <p>{{ name }}</p>
-    <center><img src={{ url}} alt="Chart" height="420" width="600"></center>
+    <center><img src={{ url1}} alt="Chart" height="420" width="600"><img src={{ url2}} alt="Chart" height="420" width="600"></center>
         <hr>
     <center><h2>Конкуренция в категориях</h2></center>
     <hr>
         {% for table in tables1 %}
             {{titles1[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
+
+        {% for table in tables2 %}
+            {{titles2[loop.index]}}
             {{ table|safe }}
     {% endfor %}
 
@@ -27,8 +32,11 @@
             {{titles[loop.index]}}
             {{ table|safe }}
     {% endfor %}
-    <center><input type="button" value="Все объявления во всех категориях"></center>
-
+     {% for table in tables32 %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
+    <center><a href="/table"><button>Смотреть все предложения</button></a></center>
         {% block content %}{% endblock %}
     </body>
 </html>

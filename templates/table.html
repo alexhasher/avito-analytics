@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Статистика</title>
+      {% else %}
+      <title>Статистика</title>
+      {% endif %}
+    </head>
+    <body>
+    <center><h1>Все предложения в категории {{ wurl }}</h1></center>
+    <hr>
+    <table>
+        {% for table in tables3 %}
+            {{titles3[loop.index]}}
+            {{ table|safe }}
+        {% endfor %}
+    </table>
+    <center><a href="/"><button>На главную</button></a></center>
+
+        {% block content %}{% endblock %}
+    </body>
+</html>
