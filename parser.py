@@ -144,6 +144,14 @@ def page_parse(url2):
         print(row_date)
         publish_date = pars_datetime(row_date)
         print(publish_date)
+        ## Экстра сбор данных
+        description = driver.find_element(By.XPATH, "//div[@data-marker='item-view/item-description']").text
+        print(description)
+        price = driver.find_element(By.XPATH, "//span[@data-marker='item-view/item-price']").get_attribute('content')
+        print(price)
+        status = True
+
+
         #Занесение данных в базу SQL
         try:
             connection = pymysql.connect(
@@ -157,8 +165,8 @@ def page_parse(url2):
             print("Успешное соединение с", db_name)
             try:
                 with connection.cursor() as cursor:
-                    insert_query = "INSERT INTO `user_data` (url, title, category, views_all, views_today, publish_date) VALUES (%s, %s, %s, %s, %s, %s);"
-                    cursor.execute(insert_query, (url, title, category, views_all, views_today, publish_date))
+                    insert_query = "INSERT INTO `user_data` (url, title, category, views_all, views_today, publish_date, description, price, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                    cursor.execute(insert_query, (url, title, category, views_all, views_today, publish_date, description, price, status))
                     connection.commit()
             finally:
                 connection.close()
@@ -171,3 +179,5 @@ def page_parse(url2):
         driver.close()
         time.sleep(1)
         driver.quit()
+
+page_parse('https://avito.ru/ufa/gotoviy_biznes/nuzhen_investor_v_predpriyatie_4314834247')
