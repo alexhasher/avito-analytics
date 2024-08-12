@@ -22,7 +22,7 @@
 Установить модули:
 
 ```Shell
-pip install beautifulSoup4 requests pymysql flask matplotlib pandas sqlalchemy
+pip install pymysql flask matplotlib pandas sqlalchemy selenium
 
 ```
 
