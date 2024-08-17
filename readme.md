@@ -33,6 +33,15 @@ user = "your_login"
 password = "your_password"
 db_name = "your_database_name"
 ```
+Для работы функции подтверждения email при регистрации добавьте в корневом каталоге файл _".env"_, следующего содержания:"
+
+```shell
+'MAIL_SERVER' = "your_smtp_server"
+'MAIL_PORT' = port_smtp_server
+'MAIL_USE_SSL' = True
+'MAIL_USERNAME' = "your_mail_username"
+'MAIL_PASSWORD' = "your_mail_password"
+```
 
 ## Как работает приложение
 На хостинге размещено web приложение _app.py_, которое обращаеться к уже сформированной базе данных в которой актуальные данные за предыдущий день.
