@@ -57,7 +57,6 @@ class FDataBase:
                     if not res:
                         print("Пользователь не найден")
                         return False
-                    print(res)
                     return res
             except Exception as ex:
                 print(ex)
