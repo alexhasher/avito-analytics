@@ -22,7 +22,7 @@
 Установить модули:
 
 ```Shell
-pip install pymysql flask matplotlib pandas sqlalchemy selenium
+pip install pymysql flask matplotlib pandas sqlalchemy selenium flask-login
 
 ```
 

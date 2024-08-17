@@ -4,10 +4,14 @@ from matplotlib import pyplot as plt
 # from requests import request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import user, password, host, db_name
+from flask_login import LoginManager, login_user, login_required   # Loginrequed позволяет использовать декораторб который огрничивает доступ пользователя
 import pymysql
 import secrets
-
+from user_login import UserLogin
+from FDataBase import FDataBase
 secret = secrets.token_urlsafe(32)
+wurl = 'https://www.avito.ru/ufa/gotoviy_biznes'
+
 
 
 df = concurents()
@@ -22,7 +26,30 @@ plt.savefig('./static/images/plot_today.png')
 
 app = Flask(__name__)
 app.secret_key = secret
-wurl = 'https://www.avito.ru/ufa/gotoviy_biznes'
+login_manager = LoginManager(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    print("load_user")
+    return UserLogin().fromDB(user_id)
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        print(request.form['email'])
+        getuser = FDataBase(host, user, password, db_name)
+        user1 = getuser.getUserByEmail(email=request.form['email'])
+        if user1 and check_password_hash(user1['password'], request.form['psw']):
+            userlogin = UserLogin().create(user1)
+            login_user(userlogin)
+            print("пользователь авторизован")
+        else:
+            print("Неверная пара логин/пароль", "error")
+    return render_template("login.html", title="Авторизация")
+
+
+
+
 @app.route("/")
 def index():
 
@@ -36,12 +63,11 @@ def index():
                            titles2=concurents_today().columns.values)
 
 @app.route("/table")
+@login_required
 def table():
     return render_template('table.html', wurl=wurl, titles3=all_offer().columns.values, tables3=[all_offer().to_html(classes='data')])
 
-@app.route("/login")
-def login():
-    return render_template("login.html", title="Авторизация")
+
 
 @app.route("/register", methods=["POST", "GET"])
 def register():

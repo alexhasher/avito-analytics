@@ -180,4 +180,11 @@ def page_parse(url2):
         time.sleep(1)
         driver.quit()
 
-page_parse('https://avito.ru/ufa/gotoviy_biznes/nuzhen_investor_v_predpriyatie_4314834247')
+# li = []
+# with open("url-list-2024-08-12 20:59:28.411259.txt", "r") as file:
+#     li.append(file.readline())
+# for i in li:
+#     page_parse(i)
+#     time.sleep(30)
+#
+# # page_parse('https://avito.ru/ufa/gotoviy_biznes/nuzhen_investor_v_predpriyatie_4314834247')
