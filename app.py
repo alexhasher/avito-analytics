@@ -33,6 +33,10 @@ def load_user(user_id):
     print("load_user")
     return UserLogin().fromDB(user_id)
 
+login_manager.login_view = 'login'
+login_manager.login_message = "Для доступа к странице пройдите авторизацию"
+login_manager.login_message_category = "success"
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if current_user.is_authenticated:
