@@ -32,10 +32,7 @@ login_manager = LoginManager(app)
 def load_user(user_id):
     print("load_user")
     return UserLogin().fromDB(user_id)
-
 login_manager.login_view = 'login'
-login_manager.login_message = "Для доступа к странице пройдите авторизацию"
-login_manager.login_message_category = "success"
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -50,7 +47,7 @@ def login():
             rm = True if request.form.get('remainme') else False
             login_user(userlogin, remember=rm)
             print("пользователь авторизован")
-            return redirect(url_for('index'))
+            return redirect(request.args.get("next") or url_for("profile"))
         else:
             print("Неверная пара логин/пароль", "error")
     return render_template("login.html", title="Авторизация")
