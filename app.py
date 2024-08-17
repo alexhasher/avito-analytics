@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect, url_for
 from sql import top10_offer, concurents, concurents_today, top10_offer_today, all_offer
 from matplotlib import pyplot as plt
 # from requests import request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import user, password, host, db_name
-from flask_login import LoginManager, login_user, login_required   # Loginrequed позволяет использовать декораторб который огрничивает доступ пользователя
+from flask_login import LoginManager, login_user,logout_user, login_required, current_user   # Loginrequed позволяет использовать декораторб который огрничивает доступ пользователя
 import pymysql
 import secrets
 from user_login import UserLogin
@@ -35,21 +35,37 @@ def load_user(user_id):
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
     if request.method == "POST":
         print(request.form['email'])
         getuser = FDataBase(host, user, password, db_name)
         user1 = getuser.getUserByEmail(email=request.form['email'])
         if user1 and check_password_hash(user1['password'], request.form['psw']):
             userlogin = UserLogin().create(user1)
-            login_user(userlogin)
+            rm = True if request.form.get('remainme') else False
+            login_user(userlogin, remember=rm)
             print("пользователь авторизован")
+            return redirect(url_for('index'))
         else:
             print("Неверная пара логин/пароль", "error")
     return render_template("login.html", title="Авторизация")
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    print("Вы вышли из аккаунта", "success")
+    return redirect(url_for('login'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    return f"""<a href="{url_for('logout')}">Выйти из профиля</a>
+                user info: {current_user.get_id()}"""
 
 
-
+@app.route("/index")
 @app.route("/")
 def index():
 
