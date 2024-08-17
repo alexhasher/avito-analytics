@@ -18,7 +18,7 @@ class FDataBase:
                 database=self.db_name,
                 cursorclass=pymysql.cursors.DictCursor
             )
-            print("Успешное соединение с", db_name)
+            print("Успешное соединение с", self.db_name)
             try:
                 with connection.cursor() as cursor:
                     insert_query = f"SELECT * FROM users WHERE id = {user_id} LIMIT 1"
