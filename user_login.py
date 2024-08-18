@@ -22,3 +22,15 @@ class UserLogin:
 
     def get_id(self):
         return str(self.__user['id'])
+
+    def get_name(self):
+        return str(self.__user['user'])
+
+    def get_email(self):
+        return str(self.__user['email'])
+
+    def get_url(self):
+        return str(self.__user['link_url'])
+
+    def get_date(self):
+        return str(self.__user['registration_date'])
