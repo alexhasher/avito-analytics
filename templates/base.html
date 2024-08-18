@@ -1,43 +1,19 @@
 <!doctype html>
 <html>
-<link rel="stylesheet" type="text/css" href="./static/css/table.css">
+<link rel="stylesheet" type="text/css" href="./static/css/style.css">
     <head>
       {% if title %}
-      <title>{{ title }} - Microblog</title>
+      <title>{{ title }}</title>
       {% else %}
-      <title>Welcome to Microblog</title>
+      <title>Avito analytics</title>
       {% endif %}
     </head>
+    <div id = "nav">
+      <header>
+        {% include "_navigation.html" %}
+      </header>
+    </div>
     <body>
-    <center><h1>Статистика запросов {{ wurl }}</h1></center>
-        <hr>
-    <center><h2>Распределение внимания пользователей по категориям</h2></center>
-          <p>{{ name }}</p>
-    <center><img src={{ url1}} alt="Chart" height="420" width="600"><img src={{ url2}} alt="Chart" height="420" width="600"></center>
-        <hr>
-    <center><h2>Конкуренция в категориях</h2></center>
-    <hr>
-        {% for table in tables1 %}
-            {{titles1[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
-
-        {% for table in tables2 %}
-            {{titles2[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
-
-    <center><h2>ТОП10 Предложений по количеству просмотров</h2></center>
-    <hr>
-    {% for table in tables %}
-            {{titles[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
-     {% for table in tables32 %}
-            {{titles[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
-    <center><a href="/table"><button>Смотреть все предложения</button></a></center>
         {% block content %}{% endblock %}
     </body>
 </html>

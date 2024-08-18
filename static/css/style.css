@@ -1,3 +1,11 @@
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+	background: #D8E3AB;
+	height: 50px;
+}
 table {
   border: 1px solid #69c;
 }
@@ -10,10 +18,16 @@ th {
 td {
   color: #669;
   padding: 7px 17px;
+  border: 1px solid #69c;
 }
 tr:hover td {
   background: #ccddff;
 }
 tr {
   height:20px;
+  border: 1px solid #69c;
+}
+
+.form-contact {
+
 }

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+    <TR>
+        <TD>user name</TD>
+        <TD>{{current_user.get_name()}}</TD>
+    <TR>
+        <TD>email</TD>
+        <TD>{{current_user.get_email()}}</TD>
+    </TR>
+        <TD>url_link</TD>
+        <TD>{{current_user.get_url()}}</TD>
+    </TR>
+        <TD>registration date</TD>
+        <TD>{{current_user.get_date()}}</TD>
+</table>
+
+<form action="/research" method="post" >
+<p><label>ссылка для иследования: </label> <input type="text" name="research">
+<p><input type="submit" value="Собирать данные" />
+</form>
+
+{% endblock %}
