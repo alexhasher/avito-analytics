@@ -24,10 +24,7 @@ MAIL_PASSWORD  = os.getenv('MAIL_PASSWORD')
 SUBJECT = os.getenv('SUBJECT')
 CONFIRMATION_URI = os.getenv('CONFIRMATION_URI')
 
-
-
 secret = secrets.token_urlsafe(32)
-wurl = 'https://www.avito.ru/ufa/gotoviy_biznes'
 
 df = concurents()
 fig = plt.figure(figsize=(10, 7))
@@ -43,8 +40,6 @@ app = Flask(__name__)
 app.secret_key = secret
 login_manager = LoginManager(app)
 
-
-# configuration of mail
 app.config['MAIL_SERVER'] = MAIL_SERVER
 app.config['MAIL_PORT'] = MAIL_PORT
 app.config['MAIL_USERNAME'] = MAIL_USERNAME
@@ -53,9 +48,11 @@ app.config['MAIL_DEFAULT_SENDER'] = (APP_NAME, MAIL_USERNAME)
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-#Initialize Mail extension
 mail = Mail()
 mail.init_app(app)
+
+
+menu = ["index", "profile", "analytics", "table", "login", "logout", "register"]
 
 
 
@@ -63,7 +60,12 @@ mail.init_app(app)
 def load_user(user_id):
     print("Загрузка данных пользователя")
     return UserLogin().fromDB(user_id)
+
 login_manager.login_view = 'login'
+
+# wurl = current_user.get_url()
+
+#'https://www.avito.ru/ufa/gotoviy_biznes'
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -80,7 +82,7 @@ def login():
             return redirect(request.args.get("next") or url_for("profile"))
         else:
             print("Неверная пара логин/пароль", "error")
-    return render_template("login.html", title="Авторизация")
+    return render_template("login.html", title="Авторизация", menu=menu)
 
 @app.route('/logout')
 @login_required
@@ -92,24 +94,28 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    return f"""<a href="{url_for('logout')}">Выйти из профиля</a>
-                user info: {current_user.get_id()}"""
+    return render_template("profile.html", user=current_user, menu=menu)
 
 
-@app.route("/index")
 @app.route("/")
 def index():
-    return render_template('base.html', name='Количество просмотров по категориям', url1='./static/images/plot_all.png',
-                           url2='./static/images/plot_today.png', wurl=wurl, tables=[top10_offer().to_html(classes='data')],
+    return render_template('index.html', user=current_user, menu=menu)
+
+
+@app.route("/analytics")
+@login_required
+def analytics():
+    return render_template('analytics.html', name='Количество просмотров по категориям', url1='./static/images/plot_all.png',
+                           url2='./static/images/plot_today.png', wurl=current_user.get_url(), tables=[top10_offer().to_html(classes='data')],
                            titles=top10_offer().columns.values, tables32=[top10_offer_today().to_html(classes='data')],
                            titles32=top10_offer_today().columns.values, tables1=[concurents().to_html(classes='data')],
                            titles1=concurents().columns.values, tables2=[concurents_today().to_html(classes='data')],
-                           titles2=concurents_today().columns.values)
+                           titles2=concurents_today().columns.values, user=current_user, menu=menu)
 
 @app.route("/table")
 @login_required
 def table():
-    return render_template('table.html', wurl=wurl, titles3=all_offer().columns.values, tables3=[all_offer().to_html(classes='data')])
+    return render_template('table.html', wurl=current_user.get_url(), titles3=all_offer().columns.values, tables3=[all_offer().to_html(classes='data')], user=current_user, menu=menu)
 
 @app.route("/verify-email/<token>")
 def verify_email(token):
@@ -142,6 +148,31 @@ def verify_email(token):
         print(ex)
         print("Не удалось установить соединение с", db_name, 'или создать пользователя ', data['name'])
 
+@app.route("/research", methods=["POST"])
+def research():
+    if request.method == "POST":
+        try:
+            connection = pymysql.connect(
+                host=host,
+                port=3306,
+                user=user,
+                password=password,
+                database=db_name,
+                cursorclass=pymysql.cursors.DictCursor
+            )
+            print("Успешное соединение с", db_name)
+            try:
+                with connection.cursor() as cursor:
+                    insert_query = "UPDATE `users` SET link_url = %s WHERE id = %s ;"
+                    cursor.execute(insert_query, (request.form['research'], current_user.get_id()))
+                    connection.commit()
+                    return redirect(url_for("profile"))
+
+            finally:
+                connection.close()
+        except Exception as ex:
+            print(ex)
+            print("Не удалось установить соединение с", db_name)
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
@@ -167,8 +198,8 @@ def register():
             print(msg)
             mail.send(msg)
             print("Токен отправлен")
-            return render_template("finish_registration.html", email=request.form['email'])
-    return render_template("register.html", title="Регистрация")
+            return render_template("finish_registration.html", email=request.form['email'], user=current_user)
+    return render_template("register.html", title="Регистрация", user=current_user, menu=menu)
 
 if __name__ == "__main__":
     app.run(debug=True)
