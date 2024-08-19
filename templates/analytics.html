@@ -10,26 +10,28 @@
         <hr>
     <center><h2>Конкуренция в категориях</h2></center>
     <hr>
-        {% for table in tables1 %}
-            {{titles1[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
 
-        {% for table in tables2 %}
-            {{titles2[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
+    <div>
+    {{ table1|safe }}
+    </div>
 
-    <center><h2>ТОП10 Предложений по количеству просмотров</h2></center>
     <hr>
-    {% for table in tables %}
-            {{titles[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
-     {% for table in tables32 %}
-            {{titles[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
-    <center><a href="/table"><button>Смотреть все предложения</button></a></center>
+    <div>
+    {{ table2|safe }}
+    </div>
+
+    <hr>
+        <center><h2>ТОП10 Предложений по количеству просмотров</h2></center>
+    <hr>
+    <div>
+    {{ table3|safe }}
+    </div>
+    <hr>
+        <center><h2>ТОП10 Предложений по количеству просмотров за сегодня</h2></center>
+    <hr>
+    <div>
+    {{ table4|safe }}
+    </div>
+
 
 {% endblock %}

@@ -105,17 +105,63 @@ def index():
 @app.route("/analytics")
 @login_required
 def analytics():
-    return render_template('analytics.html', name='Количество просмотров по категориям', url1='./static/images/plot_all.png',
-                           url2='./static/images/plot_today.png', wurl=current_user.get_url(), tables=[top10_offer().to_html(classes='data')],
-                           titles=top10_offer().columns.values, tables32=[top10_offer_today().to_html(classes='data')],
-                           titles32=top10_offer_today().columns.values, tables1=[concurents().to_html(classes='data')],
-                           titles1=concurents().columns.values, tables2=[concurents_today().to_html(classes='data')],
-                           titles2=concurents_today().columns.values, user=current_user, menu=menu)
+    return render_template('analytics.html', name='Количество просмотров по категориям',
+                           url1='./static/images/plot_all.png',
+                           url2='./static/images/plot_today.png',
+                           wurl=current_user.get_url(),
+
+                           table1=concurents().to_html(classes='table',
+                                                      border=0,
+                                                      index=False,
+                                                      na_rep='-',
+                                                      justify='left',
+                                                      columns=(concurents().columns[0],
+                                                               concurents().columns[1],
+                                                               concurents().columns[2],),),
+                           table2=concurents_today().to_html(classes='table',
+                                                       border=0,
+                                                       index=False,
+                                                       na_rep='-',
+                                                       justify='left',
+                                                       columns=(concurents_today().columns[0],
+                                                                concurents_today().columns[1],
+                                                                concurents_today().columns[2],),),
+                           table3=top10_offer().to_html(classes='table',
+                                                             border=0,
+                                                             index=False,
+                                                             na_rep='-',
+                                                             justify='left',
+                                                             columns=(top10_offer().columns[0],
+                                                                      top10_offer().columns[1],
+                                                                      top10_offer().columns[2],
+                                                                      top10_offer().columns[4],
+                                                                      top10_offer().columns[6],
+                                                                      top10_offer().columns[7],
+                                                                      top10_offer().columns[8],),),
+                           table4=top10_offer_today().to_html(classes='table',
+                                                        border=0,
+                                                        index=False,
+                                                        na_rep='-',
+                                                        justify='left',
+                                                        columns=(top10_offer_today().columns[0],
+                                                                 top10_offer_today().columns[1],
+                                                                 top10_offer_today().columns[2],
+                                                                 top10_offer_today().columns[4],
+                                                                 top10_offer_today().columns[6],
+                                                                 top10_offer_today().columns[7],
+                                                                 top10_offer_today().columns[8],),),
+                           user=current_user, menu=menu)
 
 @app.route("/table")
 @login_required
 def table():
-    return render_template('table.html', wurl=current_user.get_url(), titles3=all_offer().columns.values, tables3=[all_offer().to_html(classes='data')], user=current_user, menu=menu)
+    return render_template('table.html', wurl=current_user.get_url(),
+                           table=all_offer().to_html(classes='table',
+                                                       border=0,
+                                                       index=False,
+                                                       na_rep='-',
+                                                       justify='left',),
+                           user=current_user, menu=menu)
 
 @app.route("/verify-email/<token>")
 def verify_email(token):
