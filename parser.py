@@ -1,23 +1,20 @@
-from selenium import webdriver
+from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 import time
 from datetime import datetime, timedelta
-from config import user, password, host, db_name
+from config import user, password, host, db_name, proxy_username, proxy_port, proxy_password, proxy_address
 import pymysql
-import random
+
+proxy_url = f"http://{proxy_username}:{proxy_password}@{proxy_address}:{proxy_port}"
+seleniumwire_options = {
+    "proxy": {
+        "http": proxy_url,
+        "https": proxy_url
+    },
+}
 
 def pages_list_parse(link_url, urls_list):
-    # options
-    proxy = ["--proxy-server=50.174.7.154:80",
-             "--proxy-server=35.158.112.94:3128",
-             "--proxy-server=54.238.134.142:8080",
-             "--proxy-server=50.175.212.77:80",
-             "--proxy-server=50.172.75.127:80",
-             "--proxy-server=50.223.239.185:80",
-             "--proxy-server=190.103.177.131:80",
-             "--proxy-server=209.97.150.167:3128"
-             ]
 
     options = webdriver.ChromeOptions()
     prefs = {"profile.managed_default_content_settings.images": 2}
@@ -25,9 +22,8 @@ def pages_list_parse(link_url, urls_list):
     options.add_argument(
         "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
     options.add_argument("--disable-blink-features=AutomationControlled")  # disable automation mode
-    # options.add_argument(proxy[random.randint(0, 7)]) #set proxy
-    s = Service(executable_path='./chromedriver')
-    driver = webdriver.Chrome(service=s, options=options)
+    service = Service(executable_path='./chromedriver')
+    driver = webdriver.Chrome(service=service, seleniumwire_options=seleniumwire_options, options=options)
     driver.maximize_window()
     try:
         driver.set_page_load_timeout(60)
@@ -44,26 +40,14 @@ def pages_list_parse(link_url, urls_list):
         driver.quit()
 
 def next_page(link_url):
-    # options
-    proxy = ["--proxy-server=50.174.7.154:80",
-             "--proxy-server=35.158.112.94:3128",
-             "--proxy-server=54.238.134.142:8080",
-             "--proxy-server=50.175.212.77:80",
-             "--proxy-server=50.172.75.127:80",
-             "--proxy-server=50.223.239.185:80",
-             "--proxy-server=190.103.177.131:80",
-             "--proxy-server=209.97.150.167:3128"
-             ]
-
     options = webdriver.ChromeOptions()
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)  # без картинок
     options.add_argument(
         "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
     options.add_argument("--disable-blink-features=AutomationControlled")  # disable automation mode
-    # options.add_argument(proxy[random.randint(0, 7)]) #set proxy
-    s = Service(executable_path='./chromedriver')
-    driver = webdriver.Chrome(service=s, options=options)
+    service = Service(executable_path='./chromedriver')
+    driver = webdriver.Chrome(service=service, seleniumwire_options=seleniumwire_options, options=options)
     driver.maximize_window()
     try:
         driver.set_page_load_timeout(60)
@@ -105,26 +89,15 @@ def pars_datetime(string):
         pdate = datetime(year_int, month_int, int(date_list[0]))
     return pdate
 
-def page_parse(url2):
-    # options
-    proxy = ["--proxy-server=50.174.7.154:80",
-             "--proxy-server=35.158.112.94:3128",
-             "--proxy-server=54.238.134.142:8080",
-             "--proxy-server=50.175.212.77:80",
-             "--proxy-server=50.172.75.127:80",
-             "--proxy-server=50.223.239.185:80",
-             "--proxy-server=190.103.177.131:80",
-             "--proxy-server=209.97.150.167:3128"
-             ]
+def page_parse(url2, dbase_name):
     options = webdriver.ChromeOptions()
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)  # без картинок
     options.add_argument(
         "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
     options.add_argument("--disable-blink-features=AutomationControlled")  # disable automation mode
-    # options.add_argument(proxy[random.randint(0, 7)]) #set proxy
-    s = Service(executable_path='./chromedriver')
-    driver = webdriver.Chrome(service=s, options=options)
+    service = Service(executable_path='./chromedriver')
+    driver = webdriver.Chrome(service=service, seleniumwire_options=seleniumwire_options, options=options)
     driver.maximize_window()
     # time.sleep(10)
     try:
@@ -165,7 +138,7 @@ def page_parse(url2):
             print("Успешное соединение с", db_name)
             try:
                 with connection.cursor() as cursor:
-                    insert_query = "INSERT INTO `user_data` (url, title, category, views_all, views_today, publish_date, description, price, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                    insert_query = f"INSERT INTO `{dbase_name}` (url, title, category, views_all, views_today, publish_date, description, price, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
                     cursor.execute(insert_query, (url, title, category, views_all, views_today, publish_date, description, price, status))
                     connection.commit()
             finally:

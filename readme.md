@@ -25,6 +25,10 @@
 pip install pymysql flask matplotlib pandas sqlalchemy selenium flask-login Flask-Mail PyJWT python-dotenv
 
 ```
+Для работы прокси с авторизацией потребуеться установить пакет selenium-wire вместе с зависимостью blinker1.7.0
+```Python
+pip install blinker==1.7.0 selenium-wire
+```
 
 В директории скрипта сохдайте файл config.py, следующего содержания:
 ```Python
