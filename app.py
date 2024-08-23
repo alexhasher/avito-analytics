@@ -14,6 +14,9 @@ from flask_mail import Mail, Message
 import jwt
 from dotenv import load_dotenv
 
+import time
+from parser import pages_list_parse, next_page, page_parse
+
 load_dotenv()
 
 APP_NAME = os.getenv('APP_NAME')
@@ -26,19 +29,16 @@ CONFIRMATION_URI = os.getenv('CONFIRMATION_URI')
 
 secret = secrets.token_urlsafe(32)
 
-df = concurents()
-fig = plt.figure(figsize=(10, 7))
-plt.pie(df['views_all'], labels=df['category'])
-plt.savefig('./static/images/plot_all.png')
 
-df = concurents_today()
-fig = plt.figure(figsize=(10, 7))
-plt.pie(df['views_today'], labels=df['category'])
-plt.savefig('./static/images/plot_today.png')
+
 
 app = Flask(__name__)
 app.secret_key = secret
 login_manager = LoginManager(app)
+
+
+
+
 
 app.config['MAIL_SERVER'] = MAIL_SERVER
 app.config['MAIL_PORT'] = MAIL_PORT
@@ -60,6 +60,8 @@ menu = ["index", "profile", "analytics", "table", "login", "logout", "register"]
 def load_user(user_id):
     print("Загрузка данных пользователя")
     return UserLogin().fromDB(user_id)
+
+
 
 login_manager.login_view = 'login'
 
@@ -105,58 +107,70 @@ def index():
 @app.route("/analytics")
 @login_required
 def analytics():
+    dbase_name = current_user.get_name() + '_data'
+    df = concurents(dbase_name)
+    fig = plt.figure(figsize=(10, 7))
+    plt.pie(df['views_all'], labels=df['category'])
+    plt.savefig('./static/images/plot_all.png')
+
+    df = concurents_today(dbase_name)
+    fig = plt.figure(figsize=(10, 7))
+    plt.pie(df['views_today'], labels=df['category'])
+    plt.savefig('./static/images/plot_today.png')
+
     return render_template('analytics.html', name='Количество просмотров по категориям',
                            url1='./static/images/plot_all.png',
                            url2='./static/images/plot_today.png',
                            wurl=current_user.get_url(),
 
-                           table1=concurents().to_html(classes='table',
+                           table1=concurents(dbase_name).to_html(classes='table',
                                                       border=0,
                                                       index=False,
                                                       na_rep='-',
                                                       justify='left',
-                                                      columns=(concurents().columns[0],
-                                                               concurents().columns[1],
-                                                               concurents().columns[2],),),
-                           table2=concurents_today().to_html(classes='table',
+                                                      columns=(concurents(dbase_name).columns[0],
+                                                               concurents(dbase_name).columns[1],
+                                                               concurents(dbase_name).columns[2],),),
+                           table2=concurents_today(dbase_name).to_html(classes='table',
                                                        border=0,
                                                        index=False,
                                                        na_rep='-',
                                                        justify='left',
-                                                       columns=(concurents_today().columns[0],
-                                                                concurents_today().columns[1],
-                                                                concurents_today().columns[2],),),
-                           table3=top10_offer().to_html(classes='table',
+                                                       columns=(concurents_today(dbase_name).columns[0],
+                                                                concurents_today(dbase_name).columns[1],
+                                                                concurents_today(dbase_name).columns[2],),),
+                           table3=top10_offer(dbase_name).to_html(classes='table',
                                                              border=0,
                                                              index=False,
                                                              na_rep='-',
                                                              justify='left',
-                                                             columns=(top10_offer().columns[0],
-                                                                      top10_offer().columns[1],
-                                                                      top10_offer().columns[2],
-                                                                      top10_offer().columns[4],
-                                                                      top10_offer().columns[6],
-                                                                      top10_offer().columns[7],
-                                                                      top10_offer().columns[8],),),
-                           table4=top10_offer_today().to_html(classes='table',
+                                                             columns=(top10_offer(dbase_name).columns[0],
+                                                                      top10_offer(dbase_name).columns[1],
+                                                                      top10_offer(dbase_name).columns[2],
+                                                                      top10_offer(dbase_name).columns[4],
+                                                                      top10_offer(dbase_name).columns[6],
+                                                                      top10_offer(dbase_name).columns[7],
+                                                                      top10_offer(dbase_name).columns[8],),),
+                           table4=top10_offer_today(dbase_name).to_html(classes='table',
                                                         border=0,
                                                         index=False,
                                                         na_rep='-',
                                                         justify='left',
-                                                        columns=(top10_offer_today().columns[0],
-                                                                 top10_offer_today().columns[1],
-                                                                 top10_offer_today().columns[2],
-                                                                 top10_offer_today().columns[4],
-                                                                 top10_offer_today().columns[6],
-                                                                 top10_offer_today().columns[7],
-                                                                 top10_offer_today().columns[8],),),
+                                                        columns=(top10_offer_today(dbase_name).columns[0],
+                                                                 top10_offer_today(dbase_name).columns[1],
+                                                                 top10_offer_today(dbase_name).columns[2],
+                                                                 top10_offer_today(dbase_name).columns[4],
+                                                                 top10_offer_today(dbase_name).columns[6],
+                                                                 top10_offer_today(dbase_name).columns[7],
+                                                                 top10_offer_today(dbase_name).columns[8],),),
                            user=current_user, menu=menu)
 
 @app.route("/table")
 @login_required
 def table():
+    dbase_name = current_user.get_name() + '_data'
     return render_template('table.html', wurl=current_user.get_url(),
-                           table=all_offer().to_html(classes='table',
+                           table=all_offer(dbase_name).to_html(classes='table',
                                                        border=0,
                                                        index=False,
                                                        na_rep='-',
@@ -196,6 +210,11 @@ def verify_email(token):
 
 @app.route("/research", methods=["POST"])
 def research():
+
+    dbase_name = current_user.get_name() + '_data'
+    link_url = current_user.get_url()
+    urls_list = []
+
     if request.method == "POST":
         try:
             connection = pymysql.connect(
@@ -212,6 +231,23 @@ def research():
                     insert_query = "UPDATE `users` SET link_url = %s WHERE id = %s ;"
                     cursor.execute(insert_query, (request.form['research'], current_user.get_id()))
                     connection.commit()
+
+                    pages_list_parse(link_url, urls_list)
+                    u = link_url
+                    while next_page(u):
+                        time.sleep(60)
+                        u = next_page(u)
+                        print(u)
+                        time.sleep(60)
+                        pages_list_parse(u, urls_list)
+                        time.sleep(60)
+
+                        print(len(urls_list))
+
+                        for u in urls_list:
+                            time.sleep(60)
+                            page_parse(u, dbase_name)
+
                     return redirect(url_for("profile"))
 
             finally:
