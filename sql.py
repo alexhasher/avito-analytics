@@ -3,15 +3,16 @@ import sqlalchemy
 import pandas as pd
 from datetime import datetime
 
-def top10_offer():
+
+def top10_offer(dbase_name):
     engine = sqlalchemy.create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db_name}')
-    sql = "SELECT * FROM `user_data`"
+    sql = f"SELECT * FROM `{dbase_name}`"
     df = pd.read_sql_query(sql, engine)
     return df.nlargest(10, ['views_all'])
 
-def concurents():
+def concurents(dbase_name):
     engine = sqlalchemy.create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db_name}')
-    sql = "SELECT * FROM `user_data`"
+    sql = f"SELECT * FROM `{dbase_name}`"
     df = pd.read_sql_query(sql, engine)
     insiders = {}
     list_insiders1 = []
@@ -27,9 +28,9 @@ def concurents():
     df = pd.DataFrame(insiders)
     return df
 
-def concurents_today():
+def concurents_today(dbase_name):
     engine = sqlalchemy.create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db_name}')
-    sql = "SELECT * FROM `user_data`"
+    sql = f"SELECT * FROM `{dbase_name}`"
     df = pd.read_sql_query(sql, engine)
     insiders = {}
     list_insiders1 = []
@@ -45,14 +46,14 @@ def concurents_today():
     df = pd.DataFrame(insiders)
     return df
 
-def top10_offer_today():
+def top10_offer_today(dbase_name):
     engine = sqlalchemy.create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db_name}')
-    sql = "SELECT * FROM `user_data`"
+    sql = f"SELECT * FROM `{dbase_name}`"
     df = pd.read_sql_query(sql, engine)
     return df.nlargest(10, ['views_today'])
 
-def all_offer():
+def all_offer(dbase_name):
     engine = sqlalchemy.create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db_name}')
-    sql = "SELECT * FROM `user_data`"
+    sql = f"SELECT * FROM `{dbase_name}`"
     df = pd.read_sql_query(sql, engine)
     return df
